@@ -1560,7 +1560,6 @@ class ObservationGroupManager {
     if (!groupCard || !this.options.collapsible) return;
     
     const categoryId = groupCard.dataset.category;
-    const isCurrentlyCollapsed = groupCard.classList.contains('group-card--collapsed');
     
     groupCard.classList.toggle('group-card--collapsed');
     
