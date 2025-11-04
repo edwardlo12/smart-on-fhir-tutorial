@@ -1,16 +1,65 @@
+/**
+ * Legacy Compatibility CSS
+ * 
+ * This file contains essential legacy styles for compatibility with
+ * existing SMART on FHIR applications and fallback support.
+ * 
+ * Note: Primary styling is now handled by modern-ui.css, components.css,
+ * and responsive.css. This file maintains minimal legacy support.
+ */
+
+/* === TABLE COMPATIBILITY === */
+/* Legacy table styles for compatibility with existing FHIR data displays */
 th, td {
   padding: 5px;
   text-align: left;
 }
 
+/* === BASIC RESET === */
+/* Minimal body reset - main reset is in modern-ui.css */
 body {
   margin: 0;
 }
 
+/* === LEGACY ELEMENTS === */
+/* Hidden holder element for legacy functionality */
 #holder {
   display: none;
 }
 
+/* === ERROR HANDLING === */
+/* Basic error styling for JavaScript error boundaries */
+.error {
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+/* === OFFLINE MESSAGING === */
+/* Offline message styling for connectivity issues */
+.offline-message {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #ff6b6b;
+  color: white;
+  text-align: center;
+  padding: 12px;
+  font-weight: 500;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* === LEGACY SPINNER === */
+/* 
+ * Legacy spinner - kept for compatibility
+ * Note: New loading component is in components.css
+ */
 .spinner {
   margin: 100px auto 0;
   width: 70px;
@@ -21,7 +70,6 @@ body {
   width: 18px;
   height: 18px;
   background-color: #000;
-
   border-radius: 100%;
   display: inline-block;
   -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
@@ -38,17 +86,50 @@ body {
   animation-delay: -0.16s;
 }
 
+/* === LEGACY ANIMATIONS === */
 @-webkit-keyframes sk-bouncedelay {
-  0%, 80%, 100% { -webkit-transform: scale(0) }
-  40% { -webkit-transform: scale(1.0) }
+  0%, 80%, 100% { 
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  }
+  40% { 
+    -webkit-transform: scale(1.0);
+    transform: scale(1.0);
+  }
 }
 
 @keyframes sk-bouncedelay {
   0%, 80%, 100% {
     -webkit-transform: scale(0);
     transform: scale(0);
-  } 40% {
+  } 
+  40% {
     -webkit-transform: scale(1.0);
     transform: scale(1.0);
+  }
+}
+
+/* === PERFORMANCE OPTIMIZATION === */
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .spinner > div {
+    animation: none;
+    -webkit-animation: none;
+  }
+  
+  .spinner {
+    opacity: 0.7;
+  }
+}
+
+/* === HIGH CONTRAST SUPPORT === */
+@media (prefers-contrast: high) {
+  .error {
+    border-width: 2px;
+    font-weight: bold;
+  }
+  
+  .offline-message {
+    border-bottom: 3px solid white;
   }
 }
