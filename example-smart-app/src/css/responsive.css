@@ -1,0 +1,662 @@
+/**
+ * Responsive CSS - 響應式設計系統
+ * 
+ * 此檔案包含：
+ * - 基於 CSS Grid 和 Flexbox 的響應式布局
+ * - 行動優先的設計方法
+ * - 斷點系統和媒體查詢
+ * - 流動式排版和容器系統
+ */
+
+/* ===========================================
+   響應式斷點定義
+   =============================  .patient-layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+}
+
+/* ===========================================
+   瀏覽器相容性後援方案
+   =========================================== */
+
+/* CSS Grid 後援 - 使用 Flexbox */
+.patient-layout {
+  /* Flexbox 後援 */
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  
+  /* CSS Grid 增強 */
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: var(--spacing-lg);
+}
+
+@supports (display: grid) {
+  .patient-layout {
+    display: grid;
+  }
+}
+
+@supports not (display: grid) {
+  .patient-layout {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .patient-layout > * {
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .patient-layout > *:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* CSS Custom Properties 後援 */
+:root {
+  /* 後援顏色值 */
+  --primary-color: #2563eb;
+  --border-color: #e5e7eb;
+  --background-color: #ffffff;
+  --text-primary: #111827;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --border-radius-md: 8px;
+  --font-size-base: 16px;
+}
+
+/* 不支援 CSS Variables 的瀏覽器後援 */
+.card {
+  background: #ffffff; /* 後援值 */
+  background: var(--background-color);
+  
+  border: 1px solid #e5e7eb; /* 後援值 */
+  border: 1px solid var(--border-color);
+  
+  border-radius: 8px; /* 後援值 */
+  border-radius: var(--border-radius-md);
+  
+  padding: 16px; /* 後援值 */
+  padding: var(--spacing-md);
+}
+
+.button {
+  background: #2563eb; /* 後援值 */
+  background: var(--primary-color);
+  
+  color: #ffffff; /* 後援值 */
+  color: white;
+  
+  padding: 8px 16px; /* 後援值 */
+  padding: var(--spacing-sm) var(--spacing-md);
+  
+  border-radius: 6px; /* 後援值 */
+  border-radius: var(--border-radius-sm);
+}
+
+/* Flexbox gap 後援 */
+.data-groups {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -8px; /* 負邊距模擬 gap */
+}
+
+.data-groups > * {
+  margin: 8px; /* 模擬 gap */
+}
+
+@supports (gap: 1rem) {
+  .data-groups {
+    margin: 0;
+    gap: var(--spacing-md);
+  }
+  
+  .data-groups > * {
+    margin: 0;
+  }
+}
+
+/* Object-fit 後援 */
+.media-object {
+  width: 100%;
+  height: 200px;
+  background-size: cover; /* 後援 */
+  background-position: center;
+}
+
+@supports (object-fit: cover) {
+  .media-object {
+    object-fit: cover;
+    background: none;
+  }
+}
+
+/* Sticky positioning 後援 */
+.sticky-header {
+  position: relative; /* 後援 */
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Modern Flexbox 後援 (IE11) */
+.flex-container {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.flex-item {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
+/* Transform 後援 */
+.transform-element {
+  /* IE9+ */
+  -ms-transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+/* Transition 後援 */
+.transition-element {
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+/* Backdrop filter 後援 */
+.backdrop-blur {
+  background: rgba(255, 255, 255, 0.8); /* 後援 */
+}
+
+@supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+  .backdrop-blur {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* Viewport units 後援 */
+.full-height {
+  height: 100vh; /* 主要值 */
+  height: calc(100vh - env(safe-area-inset-bottom)); /* iOS Safari 後援 */
+}
+
+/* Feature detection via JavaScript */
+.no-js .progressive-enhancement {
+  display: none;
+}
+
+.js .progressive-enhancement {
+  display: block;
+}
+
+/* Print 樣式 */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .card {
+    break-inside: avoid;
+    border: 1px solid #000;
+  }
+  
+  .button {
+    display: none;
+  }
+  
+  body {
+    background: white;
+    color: black;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+}
+
+/*
+ * 斷點策略：行動優先 (Mobile First)
+ * - 基礎樣式：320px+ (手機)
+ * - sm: 640px+ (大手機)
+ * - md: 768px+ (平板)
+ * - lg: 1024px+ (桌面)
+ * - xl: 1280px+ (大桌面)
+ * - 2xl: 1536px+ (超大桌面)
+ */
+
+/* ===========================================
+   容器系統
+   =========================================== */
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+/* 斷點容器 */
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+    padding: 0 var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+    padding: 0 var(--spacing-xl);
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1536px;
+  }
+}
+
+/* 流動式容器 */
+.container--fluid {
+  max-width: none;
+}
+
+/* ===========================================
+   CSS Grid 系統
+   =========================================== */
+
+.grid {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+/* 基礎網格 - 行動裝置 (1欄) */
+.grid--1 { grid-template-columns: 1fr; }
+.grid--2 { grid-template-columns: 1fr; }
+.grid--3 { grid-template-columns: 1fr; }
+.grid--4 { grid-template-columns: 1fr; }
+.grid--6 { grid-template-columns: 1fr; }
+.grid--12 { grid-template-columns: 1fr; }
+
+/* 平板斷點 - 適應性網格 */
+@media (min-width: 768px) {
+  .grid--2 { grid-template-columns: repeat(2, 1fr); }
+  .grid--3 { grid-template-columns: repeat(2, 1fr); }
+  .grid--4 { grid-template-columns: repeat(2, 1fr); }
+  .grid--6 { grid-template-columns: repeat(3, 1fr); }
+  .grid--12 { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* 桌面斷點 - 完整網格 */
+@media (min-width: 1024px) {
+  .grid--3 { grid-template-columns: repeat(3, 1fr); }
+  .grid--4 { grid-template-columns: repeat(4, 1fr); }
+  .grid--6 { grid-template-columns: repeat(6, 1fr); }
+  .grid--12 { grid-template-columns: repeat(12, 1fr); }
+}
+
+/* 網格間距變體 */
+.grid--gap-sm { gap: var(--spacing-sm); }
+.grid--gap-lg { gap: var(--spacing-lg); }
+.grid--gap-xl { gap: var(--spacing-xl); }
+
+/* 網格項目跨度 */
+.col-span-1 { grid-column: span 1; }
+.col-span-2 { grid-column: span 2; }
+.col-span-3 { grid-column: span 3; }
+.col-span-4 { grid-column: span 4; }
+.col-span-6 { grid-column: span 6; }
+.col-span-12 { grid-column: span 12; }
+.col-span-full { grid-column: 1 / -1; }
+
+/* 響應式跨度 */
+@media (min-width: 768px) {
+  .md\:col-span-1 { grid-column: span 1; }
+  .md\:col-span-2 { grid-column: span 2; }
+  .md\:col-span-3 { grid-column: span 3; }
+  .md\:col-span-4 { grid-column: span 4; }
+  .md\:col-span-6 { grid-column: span 6; }
+  .md\:col-span-12 { grid-column: span 12; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:col-span-1 { grid-column: span 1; }
+  .lg\:col-span-2 { grid-column: span 2; }
+  .lg\:col-span-3 { grid-column: span 3; }
+  .lg\:col-span-4 { grid-column: span 4; }
+  .lg\:col-span-6 { grid-column: span 6; }
+  .lg\:col-span-12 { grid-column: span 12; }
+}
+
+/* ===========================================
+   Flexbox 響應式系統
+   =========================================== */
+
+.flex-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: calc(var(--spacing-md) * -0.5);
+}
+
+.flex-grid > * {
+  padding: calc(var(--spacing-md) * 0.5);
+  flex: 1 1 100%; /* 行動裝置預設全寬 */
+}
+
+/* 平板斷點 */
+@media (min-width: 768px) {
+  .flex-grid--md-2 > * { flex: 1 1 calc(50% - var(--spacing-md)); }
+  .flex-grid--md-3 > * { flex: 1 1 calc(33.333% - var(--spacing-md)); }
+  .flex-grid--md-4 > * { flex: 1 1 calc(25% - var(--spacing-md)); }
+}
+
+/* 桌面斷點 */
+@media (min-width: 1024px) {
+  .flex-grid--lg-2 > * { flex: 1 1 calc(50% - var(--spacing-md)); }
+  .flex-grid--lg-3 > * { flex: 1 1 calc(33.333% - var(--spacing-md)); }
+  .flex-grid--lg-4 > * { flex: 1 1 calc(25% - var(--spacing-md)); }
+  .flex-grid--lg-6 > * { flex: 1 1 calc(16.666% - var(--spacing-md)); }
+}
+
+/* ===========================================
+   SMART 應用程式專用布局
+   =========================================== */
+
+/* 主要應用程式布局 */
+.app-layout {
+  display: grid;
+  min-height: 100vh;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas: 
+    "header"
+    "main"
+    "footer";
+}
+
+.app-layout__header {
+  grid-area: header;
+  background: var(--background-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--spacing-md) 0;
+}
+
+.app-layout__main {
+  grid-area: main;
+  padding: var(--spacing-lg) 0;
+}
+
+.app-layout__footer {
+  grid-area: footer;
+  background: var(--surface-color);
+  border-top: 1px solid var(--border-color);
+  padding: var(--spacing-md) 0;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* 患者資料布局 */
+.patient-layout {
+  display: grid;
+  gap: var(--spacing-lg);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .patient-layout {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .patient-layout {
+    grid-template-columns: 300px 1fr;
+    gap: var(--spacing-xl);
+  }
+}
+
+/* 觀察值資料布局 */
+.observations-layout {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .observations-layout {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .observations-layout {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .observations-layout {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ===========================================
+   響應式顯示工具類別
+   =========================================== */
+
+/* 隱藏/顯示工具類別 */
+.hidden { display: none !important; }
+.block { display: block !important; }
+.inline { display: inline !important; }
+.inline-block { display: inline-block !important; }
+.flex { display: flex !important; }
+.grid { display: grid !important; }
+
+/* 響應式顯示 */
+@media (max-width: 639px) {
+  .sm\:hidden { display: none !important; }
+}
+
+@media (min-width: 640px) {
+  .sm\:block { display: block !important; }
+  .sm\:inline { display: inline !important; }
+  .sm\:flex { display: flex !important; }
+  .sm\:grid { display: grid !important; }
+}
+
+@media (max-width: 767px) {
+  .md\:hidden { display: none !important; }
+}
+
+@media (min-width: 768px) {
+  .md\:block { display: block !important; }
+  .md\:inline { display: inline !important; }
+  .md\:flex { display: flex !important; }
+  .md\:grid { display: grid !important; }
+}
+
+@media (max-width: 1023px) {
+  .lg\:hidden { display: none !important; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:block { display: block !important; }
+  .lg\:inline { display: inline !important; }
+  .lg\:flex { display: flex !important; }
+  .lg\:grid { display: grid !important; }
+}
+
+/* ===========================================
+   響應式間距
+   =========================================== */
+
+/* 響應式 padding */
+@media (min-width: 768px) {
+  .md\:p-0 { padding: 0 !important; }
+  .md\:p-sm { padding: var(--spacing-sm) !important; }
+  .md\:p-md { padding: var(--spacing-md) !important; }
+  .md\:p-lg { padding: var(--spacing-lg) !important; }
+  .md\:p-xl { padding: var(--spacing-xl) !important; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:p-0 { padding: 0 !important; }
+  .lg\:p-sm { padding: var(--spacing-sm) !important; }
+  .lg\:p-md { padding: var(--spacing-md) !important; }
+  .lg\:p-lg { padding: var(--spacing-lg) !important; }
+  .lg\:p-xl { padding: var(--spacing-xl) !important; }
+}
+
+/* 響應式 margin */
+@media (min-width: 768px) {
+  .md\:m-0 { margin: 0 !important; }
+  .md\:m-sm { margin: var(--spacing-sm) !important; }
+  .md\:m-md { margin: var(--spacing-md) !important; }
+  .md\:m-lg { margin: var(--spacing-lg) !important; }
+  .md\:m-xl { margin: var(--spacing-xl) !important; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:m-0 { margin: 0 !important; }
+  .lg\:m-sm { margin: var(--spacing-sm) !important; }
+  .lg\:m-md { margin: var(--spacing-md) !important; }
+  .lg\:m-lg { margin: var(--spacing-lg) !important; }
+  .lg\:m-xl { margin: var(--spacing-xl) !important; }
+}
+
+/* ===========================================
+   響應式文字
+   =========================================== */
+
+/* 響應式文字大小 */
+@media (min-width: 768px) {
+  .md\:text-xs { font-size: var(--font-size-xs) !important; }
+  .md\:text-sm { font-size: var(--font-size-sm) !important; }
+  .md\:text-base { font-size: var(--font-size-base) !important; }
+  .md\:text-lg { font-size: var(--font-size-lg) !important; }
+  .md\:text-xl { font-size: var(--font-size-xl) !important; }
+  .md\:text-2xl { font-size: var(--font-size-2xl) !important; }
+  .md\:text-3xl { font-size: var(--font-size-3xl) !important; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:text-xs { font-size: var(--font-size-xs) !important; }
+  .lg\:text-sm { font-size: var(--font-size-sm) !important; }
+  .lg\:text-base { font-size: var(--font-size-base) !important; }
+  .lg\:text-lg { font-size: var(--font-size-lg) !important; }
+  .lg\:text-xl { font-size: var(--font-size-xl) !important; }
+  .lg\:text-2xl { font-size: var(--font-size-2xl) !important; }
+  .lg\:text-3xl { font-size: var(--font-size-3xl) !important; }
+}
+
+/* 響應式文字對齊 */
+@media (min-width: 768px) {
+  .md\:text-left { text-align: left !important; }
+  .md\:text-center { text-align: center !important; }
+  .md\:text-right { text-align: right !important; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:text-left { text-align: left !important; }
+  .lg\:text-center { text-align: center !important; }
+  .lg\:text-right { text-align: right !important; }
+}
+
+/* ===========================================
+   觸控友善設計
+   =========================================== */
+
+/* 觸控目標最小尺寸 (44px x 44px) */
+@media (max-width: 1023px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn {
+    min-height: 44px;
+    padding: var(--spacing-sm) var(--spacing-lg);
+  }
+  
+  .form-input {
+    min-height: 44px;
+  }
+}
+
+/* ===========================================
+   高DPI 螢幕優化
+   =========================================== */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* 高DPI 螢幕的特殊樣式 */
+  .card {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* ===========================================
+   暗色主題支援準備
+   =========================================== */
+
+@media (prefers-color-scheme: dark) {
+  /* 暗色主題變數覆蓋 - 未來實作時使用 */
+  /*
+  :root {
+    --background-color: #111827;
+    --surface-color: #1f2937;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --border-color: #374151;
+  }
+  */
+}
+
+/* ===========================================
+   列印樣式優化
+   =========================================== */
+
+@media print {
+  .container {
+    max-width: none;
+    padding: 0;
+  }
+  
+  .grid {
+    gap: var(--spacing-sm);
+  }
+  
+  .patient-layout,
+  .observations-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .app-layout__header,
+  .app-layout__footer {
+    display: none;
+  }
+}

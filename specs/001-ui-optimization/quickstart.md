@@ -39,11 +39,12 @@
 
 3. **啟動 Docker 容器**
    ```bash
-   docker-compose up -d
+   # 使用新版 Docker Compose 命令
+   docker compose up -d
    ```
 
 4. **存取應用程式**
-   - 開啟瀏覽器，訪問 `http://localhost:8080`
+   - 開啟瀏覽器，訪問 `http://localhost:8002` (注意：端口為 8002，非 8080)
    - 應用程式將自動載入優化後的界面
 
 ### 方法二：直接開發
@@ -94,13 +95,18 @@ example-smart-app/
 
 ```bash
 # 1. 啟動本地服務器
-docker-compose up -d
+docker compose up -d
 
 # 2. 開啟瀏覽器訪問
-open http://localhost:8080/example-smart-app/
+open http://localhost:8002/
 
 # 3. 檢查健康狀態
-open http://localhost:8080/example-smart-app/health
+open http://localhost:8002/health.html
+
+# 4. 檢查各種啟動方式
+open http://localhost:8002/launch.html              # SMART 啟動
+open http://localhost:8002/launch-patient.html      # 患者啟動
+open http://localhost:8002/launch-smart-sandbox.html # 沙盒啟動
 ```
 
 ### 2. SMART 沙盒測試
@@ -110,8 +116,8 @@ open http://localhost:8080/example-smart-app/health
 1. 訪問 [Cerner Code Console](https://code-console.cerner.com/)
 2. 建立新的應用程式註冊
 3. 使用以下設定：
-   - **SMART Launch URI**: `http://localhost:8080/example-smart-app/launch.html`
-   - **Redirect URI**: `http://localhost:8080/example-smart-app/`
+   - **SMART Launch URI**: `http://localhost:8002/launch.html`
+   - **Redirect URI**: `http://localhost:8002/`
    - **App Type**: Provider
    - **Scopes**: `patient/Patient.read patient/Observation.read launch online_access openid profile`
 
@@ -119,7 +125,7 @@ open http://localhost:8080/example-smart-app/health
 
 1. 訪問 [SMART App Launcher](https://launch.smarthealthit.org/)
 2. 設定以下參數：
-   - **App Launch URL**: `http://localhost:8080/example-smart-app/launch-smart-sandbox.html`
+   - **App Launch URL**: `http://localhost:8002/launch-smart-sandbox.html`
    - **FHIR Version**: R2 (DSTU2)
    - 選擇測試患者和提供者
 
@@ -190,13 +196,17 @@ open http://localhost:8080/example-smart-app/health
 **解決方案**:
 ```bash
 # 檢查 Docker 容器狀態
-docker-compose ps
+docker compose ps
 
 # 重新啟動容器
-docker-compose restart
+docker compose restart
 
-# 檢查端口是否被佔用
-lsof -i :8080
+# 檢查端口是否被佔用 (注意：使用端口 8002)
+lsof -i :8002
+
+# 檢查應用程式響應
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8002/
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8002/health.html
 ```
 
 ### 問題：SMART 授權失敗
@@ -267,12 +277,29 @@ lsof -i :8080
 ### 效能最佳化
 
 1. **CSS 最佳化**
+   ```bash
+   # 生成優化的 CSS 捆綁檔案
+   cd example-smart-app
+   ./build-css.sh
+   
+   # 檢查生成的檔案
+   ls -la src/css/build/bundle.css
+   ls -la index-prod.html
+   ```
+   
    - 移除未使用的樣式
    - 合併和壓縮 CSS 檔案
+   - 生產版本使用捆綁的 CSS (77.2 KB)
 
 2. **JavaScript 最佳化**
    - 實施延遲載入
    - 最小化 DOM 操作
+   - 全域錯誤邊界處理
+   - 虛擬捲動支援
+
+3. **版本對比**
+   - **開發版本**: `http://localhost:8002/index-dev.html` (分別載入 CSS 檔案)
+   - **生產版本**: `http://localhost:8002/index-prod.html` (使用捆綁 CSS)
 
 ## 下一步
 
